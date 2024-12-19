@@ -1,8 +1,9 @@
-let currentDirectory = "~";
-const directories = ["~", "workspace", "js"];
+const homeDirectory = "~";
+const currentDirectory = [homeDirectory];
+const directories = [homeDirectory, "workspace", "js", "practice"];
 
 const promptMessage = function () {
-  return "tell " + currentDirectory + " % ";
+  return "tell " + currentDirectory.at(-1) + " % ";
 };
 
 const echo = function (command, args) {
@@ -19,19 +20,28 @@ const isChildFolder = function (curDir) {
 };
 
 const isPathValid = function (path) {
-  return path.split("/").every(isChildFolder(currentDirectory));
+  return path.split("/").every(isChildFolder(currentDirectory.at(-1)));
 };
 
 const fileNotFoundMessage = function (command, path) {
   return command + ": no such file or directory: " + path;
 };
 
-const changeDirectory = function (command, [path]) {
-  if (!isPathValid(path)) {
-    return fileNotFoundMessage(command, path);
-  }
+const safePop = function (array, elementToSave) {
+  array.at(-1) !== elementToSave && array.pop();
+};
 
-  currentDirectory = path.split("/").at(-1);
+const getCurrentDirectory = function (givenPath) {
+  const path = givenPath.split("/");
+
+  for (const directory of path) {
+    directory === ".." ? safePop(currentDirectory, homeDirectory) :
+      currentDirectory.push(directory);
+  }
+};
+
+const changeDirectory = function (command, [path]) {
+  return getCurrentDirectory(path);
 };
 
 const commandNotFoundErr = function (command) {
