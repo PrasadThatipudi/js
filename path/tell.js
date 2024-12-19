@@ -1,6 +1,6 @@
-let curDir = ["~"];
+const curDir = ["~"];
 
-const promptName = function () {
+const promptMessage = function () {
   return "tell " + curDir.at(-1) + " % ";
 };
 
@@ -9,7 +9,11 @@ const echo = function (args) {
 };
 
 const changeDirectory = function ([curPath]) {
-  curDir = curDir.concat(curPath.split("/"));
+  const path = curPath.split("/");
+
+  for (const directory of path) {
+    directory === ".." ? curDir.pop() : curDir.push(directory);
+  }
 };
 
 const runCommand = function (command, args) {
@@ -29,7 +33,7 @@ const displayMessage = function (message) {
 
 const runShell = function () {
   while (true) {
-    const commandToRun = prompt(promptName());
+    const commandToRun = prompt(promptMessage());
     const [command, ...args] = commandToRun.split(" ");
 
     displayMessage(runCommand(command, args));
