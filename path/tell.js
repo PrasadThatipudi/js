@@ -1,28 +1,56 @@
-const curDir = ["~"];
+let currentDirectory = "~";
+const directories = ["~", "workspace"];
 
 const promptMessage = function () {
-  return "tell " + curDir.at(-1) + " % ";
+  return "tell " + currentDirectory + " % ";
 };
 
-const echo = function (args) {
+const echo = function (command, args) {
   return args.join(" ");
 };
 
-const changeDirectory = function ([curPath]) {
-  const path = curPath.split("/");
+const isChildFolder = function (folder) {
+  const index = directories.indexOf(currentDirectory);
 
-  for (const directory of path) {
-    directory === ".." ? curDir.pop() : curDir.push(directory);
+  return directories[index + 1] === folder;
+};
+
+const isPathValid = function (path) {
+  return path.split("/").every(isChildFolder);
+};
+
+const fileNotFoundMessage = function (command, path) {
+  return command + ": no such file or directory: " + path;
+};
+
+const changeDirectory = function (command, [path]) {
+  if (!isPathValid(path)) {
+    return fileNotFoundMessage("cd", path);
   }
+
+  currentDirectory = path.at(-1);
+};
+
+const commandNotFoundError = function (command) {
+  return "zsh: command not founnd: " + command;
+};
+
+const getRelatedCommandFunction = function (givenCommand) {
+  return function (initFunction, [command, functionReference]) {
+    return command === givenCommand ? functionReference : initFunction;
+  };
 };
 
 const runCommand = function (command, args) {
-  switch (command) {
-    case "echo":
-      return echo(args);
-    case "cd":
-      return changeDirectory(args);
-  }
+  const commands = [
+    ["echo", echo],
+    ["cd", changeDirectory]
+  ];
+
+  const commandFunction = commands.reduce(getRelatedCommandFunction(command),
+    commandNotFoundError);
+
+  return commandFunction(command, args);
 };
 
 const displayMessage = function (message) {
