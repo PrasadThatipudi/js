@@ -31,13 +31,13 @@ const changeDirectory = function (command, [path]) {
   currentDirectory = path.at(-1);
 };
 
-const commandNotFoundError = function (command) {
+const commandNotFoundErr = function (command) {
   return "zsh: command not founnd: " + command;
 };
 
-const getRelatedCommandFunction = function (givenCommand) {
-  return function (initFunction, [command, functionReference]) {
-    return command === givenCommand ? functionReference : initFunction;
+const getCommandFunction = function (givenCommand) {
+  return function (initFn, [command, fnReference]) {
+    return command === givenCommand ? fnReference : initFn;
   };
 };
 
@@ -47,10 +47,8 @@ const runCommand = function (command, args) {
     ["cd", changeDirectory]
   ];
 
-  const commandFunction = commands.reduce(getRelatedCommandFunction(command),
-    commandNotFoundError);
-
-  return commandFunction(command, args);
+  return commands.reduce(getCommandFunction(command), commandNotFoundErr)
+    (command, args);
 };
 
 const displayMessage = function (message) {
