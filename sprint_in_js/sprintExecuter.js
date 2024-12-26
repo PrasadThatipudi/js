@@ -1,4 +1,7 @@
-const readSprint = () => prompt("Paste your sprint program here: ");
+const readSprint = function () {
+  const code = prompt("Paste your sprint program here: ").trim();
+  return code.length === 0 ? readSprint() : code;
+};
 
 const removeAll = (array, culprit) =>
   array.filter((element) => element !== culprit);
@@ -12,16 +15,12 @@ const stringToArray = function (string, separator) {
 };
 
 const stringToNumber = (numbers) => numbers.map((number) => +number);
-
-const arrayToObject = function (obj, number, index) {
-  obj[index] = number;
-  return obj;
-};
-
+const arrayToObject = (obj, number, index) => ({ ...obj, [index]: number });
 const arrangeCode = (numbers) => numbers.reduce(arrayToObject, {});
 
 const main = function () {
-  const code = stringToNumber(removeAll(stringToArray(readSprint(), " "), ""));
+  const codeInString = readSprint();
+  const code = stringToNumber(removeAll(stringToArray(codeInString, " "), ""));
 };
 
 console.log(main());
