@@ -11,7 +11,38 @@ const stringToArray = function (string, separator) {
   return string.split(separator);
 };
 
+const stringToNumber = (numbers) => numbers.map((number) => +number);
+
+const main = function () {
+  const code = removeAll(stringToArray(readSprint(), " "), "");
+  console.log(code);
+};
+
+// console.log(main());
+
 // ----------------- Testing Fragment -------------------
+const areEqual = function (element1, element2) {
+  return element1 === element2;
+};
+
+const areArraysEqual = function (element1, element2) {
+  if (!Array.isArray(element1)) {
+    return areEqual(element1, element2);
+  }
+
+  if (!areEqual(element1.length, element2.length)) {
+    return false;
+  }
+
+  for (const index in element1) {
+    if (!areArraysEqual(element1[index], element2[index])) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 const getTestResult = function ([functionName, params, expected]) {
   const actual = functionName(...params);
 
@@ -19,18 +50,50 @@ const getTestResult = function ([functionName, params, expected]) {
 };
 
 const isTestFailed = function ([functionName, params, expected, actual]) {
-  return actual !== expected;
+  return !areArraysEqual(actual, expected);
+};
+
+const complement = function (functionRef) {
+  return function (...args) {
+    return !functionRef(...args);
+  };
+};
+
+const isTestPassed = function (testResult) {
+  return complement(isTestFailed)(testResult);
+};
+
+const displayTestResult = function (failed) {
+  if (failed.length === 0) {
+    console.log("All tests passed!");
+    return;
+  }
+
+  console.table(failed);
+};
+
+const displayPassedTests = function (passed) {
+  if (confirm("Do you want to see passed tests?")) {
+    console.table(passed);
+  }
 };
 
 const testExecuter = function (testCases) {
-  const failed = testCases.map(getTestResult).filter(isTestFailed);
+  const testResult = testCases.map(getTestResult);
+  const failed = testResult.filter(isTestFailed);
+  const passed = testResult.filter(isTestPassed);
 
-  console.table(failed);
+  displayTestResult(failed);
+  displayPassedTests(passed);
 };
 
 const testCases = [
   [stringToArray, ["1 2 3", " "], ["1", "2", "3"]],
   [stringToArray, ["", " "], []],
+
+  [removeAll, [["1", "2", "2", "3"], "2"], ["1", "3"]],
+
+  [stringToNumber, [["1", "2", "3"]], [1, 2, 3]],
 ];
 
 testExecuter(testCases);
