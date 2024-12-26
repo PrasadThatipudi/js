@@ -13,12 +13,18 @@ const stringToArray = function (string, separator) {
 
 const stringToNumber = (numbers) => numbers.map((number) => +number);
 
-const main = function () {
-  const code = removeAll(stringToArray(readSprint(), " "), "");
-  console.log(code);
+const arrayToObject = function (obj, number, index) {
+  obj[index] = number;
+  return obj;
 };
 
-// console.log(main());
+const arrangeCode = (numbers) => numbers.reduce(arrayToObject, {});
+
+const main = function () {
+  const code = stringToNumber(removeAll(stringToArray(readSprint(), " "), ""));
+};
+
+console.log(main());
 
 // ----------------- Testing Fragment -------------------
 const areEqual = function (element1, element2) {
