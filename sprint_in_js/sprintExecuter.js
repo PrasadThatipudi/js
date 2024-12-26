@@ -1,6 +1,7 @@
-const readSprint = function () {
-  return prompt("Paste your sprint program here: ");
-};
+const readSprint = () => prompt("Paste your sprint program here: ");
+
+const removeAll = (array, culprit) =>
+  array.filter((element) => element !== culprit);
 
 const stringToArray = function (string, separator) {
   if (string.trim().length === 0) {
@@ -18,7 +19,6 @@ const getTestResult = function ([functionName, params, expected]) {
 };
 
 const isTestFailed = function ([functionName, params, expected, actual]) {
-
   return actual !== expected;
 };
 
@@ -30,7 +30,7 @@ const testExecuter = function (testCases) {
 
 const testCases = [
   [stringToArray, ["1 2 3", " "], ["1", "2", "3"]],
-  [stringToArray, ["", " "], []]
+  [stringToArray, ["", " "], []],
 ];
 
 testExecuter(testCases);
