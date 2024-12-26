@@ -6,21 +6,14 @@ const readSprint = function () {
 const removeAll = (array, culprit) =>
   array.filter((element) => element !== culprit);
 
-const stringToArray = function (string, separator) {
-  if (string.trim().length === 0) {
-    return [];
-  }
-
-  return string.split(separator);
-};
-
 const stringToNumber = (numbers) => numbers.map((number) => +number);
 const arrayToObject = (obj, number, index) => ({ ...obj, [index]: number });
 const arrangeCode = (numbers) => numbers.reduce(arrayToObject, {});
 
 const main = function () {
   const codeInString = readSprint();
-  const code = stringToNumber(removeAll(stringToArray(codeInString, " "), ""));
+  const code = stringToNumber(removeAll(codeInString.split(" "), ""));
+  console.log(code);
 };
 
 console.log(main());
