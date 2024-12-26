@@ -7,13 +7,29 @@ const removeAll = (array, culprit) =>
   array.filter((element) => element !== culprit);
 
 const stringToNumber = (numbers) => numbers.map((number) => +number);
-const arrayToObject = (obj, number, index) => ({ ...obj, [index]: number });
+const arrayToObject = (obj, number, index) => ({ ...obj, [index + 1]: number });
 const arrangeCode = (numbers) => numbers.reduce(arrayToObject, {});
+const put = (code, targetCell, value) => (code[targetCell] = value);
+
+const sprintExecuter = function (code) {
+  let curCell = 1;
+
+  while (code[curCell] !== 9) {
+    if (code[curCell] === 0) {
+      put(code, code[curCell + 1], code[curCell + 2]);
+      curCell += 2;
+    }
+
+    curCell++;
+  }
+  return code;
+};
 
 const main = function () {
   const codeInString = readSprint();
   const code = stringToNumber(removeAll(codeInString.split(" "), ""));
-  console.log(code);
+  // console.log(arrangeCode(code));
+  return sprintExecuter(arrangeCode(code));
 };
 
 console.log(main());
