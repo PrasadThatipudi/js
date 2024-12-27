@@ -1,3 +1,11 @@
+const cumulativeSumReducer = function (numbers, number) {
+  const nextNum = numbers.at(-1) + number || number;
+  return [...numbers, nextNum];
+};
+
+const cumulativeSum = (numbers) => numbers.reduce(cumulativeSumReducer, []);
+const rangeArray = (noOfOnes) => Array(noOfOnes).fill(1);
+const range = (from, to) => cumulativeSum([from, ...rangeArray(to - from - 1)]);
 const readSprint = function () {
   const code = prompt("Paste your sprint program here: ").trim();
   return code.length === 0 ? readSprint() : code;
@@ -7,20 +15,37 @@ const removeAll = (array, culprit) =>
   array.filter((element) => element !== culprit);
 
 const stringToNumber = (numbers) => numbers.map((number) => +number);
+
 const arrayToObject = (obj, number, index) => ({ ...obj, [index + 1]: number });
-const arrangeCode = (numbers) => numbers.reduce(arrayToObject, {});
-const put = (code, targetCell, value) => (code[targetCell] = value);
+const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
+
+const put = (code, value, targetCell) => (code[targetCell] = value);
+
+const getSpecifiedValues = (object, keys) => keys.map((key) => object[key]);
+const executeInstruction = function (code, instruction, args, curCell) {
+  instruction(code, ...args);
+
+  return curCell + args.length + 1;
+};
 
 const sprintExecuter = function (code) {
+  const halt = 9;
+  const instructions = [{ instruction: 0, fn: put, noOfArgs: 2 }];
   let curCell = 1;
 
-  while (code[curCell] !== 9) {
-    if (code[curCell] === 0) {
-      put(code, code[curCell + 1], code[curCell + 2]);
-      curCell += 2;
-    }
+  while (code[curCell] !== halt) {
+    const currentInstruction = code[curCell];
+    const instructionObject = instructions.find(
+      ({ instruction }) => instruction === currentInstruction
+    );
 
-    curCell++;
+    const { noOfArgs, fn: instructionToExecute } = instructionObject;
+    const args = getSpecifiedValues(
+      code,
+      range(curCell + 1, curCell + noOfArgs + 1)
+    );
+
+    curCell = executeInstruction(code, instructionToExecute, args, curCell);
   }
   return code;
 };
@@ -28,11 +53,11 @@ const sprintExecuter = function (code) {
 const main = function () {
   const codeInString = readSprint();
   const code = stringToNumber(removeAll(codeInString.split(" "), ""));
-  // console.log(arrangeCode(code));
-  return sprintExecuter(arrangeCode(code));
+
+  return sprintExecuter(convertToObject(code));
 };
 
-console.log(main());
+// console.log(main());
 
 // ----------------- Testing Fragment -------------------
 const areEqual = function (element1, element2) {
@@ -102,12 +127,13 @@ const testExecuter = function (testCases) {
 };
 
 const testCases = [
-  [stringToArray, ["1 2 3", " "], ["1", "2", "3"]],
-  [stringToArray, ["", " "], []],
-
   [removeAll, [["1", "2", "2", "3"], "2"], ["1", "3"]],
 
   [stringToNumber, [["1", "2", "3"]], [1, 2, 3]],
+  [cumulativeSum, [[1, 1, 1, 1, 1]], [1, 2, 3, 4, 5]],
+  [rangeArray, [2], [1, 1]],
+  [range, [0, 4], [0, 1, 2, 3]],
+  [range, [1, 4], [1, 2, 3]],
 ];
 
 testExecuter(testCases);
