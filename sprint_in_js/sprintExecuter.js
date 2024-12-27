@@ -19,34 +19,38 @@ const stringToNumber = (numbers) => numbers.map((number) => +number);
 const arrayToObject = (obj, number, index) => ({ ...obj, [index + 1]: number });
 const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
 
-const put = (code, value, targetCell) => (code[targetCell] = value);
+const put = function (code, currentCell, value, targetCell) {
+  code[targetCell] = value;
+  return currentCell + 3;
+};
 
-const getSpecifiedValues = (object, keys) => keys.map((key) => object[key]);
+const getValuesOfKeys = (object, keys) => keys.map((key) => object[key]);
 const executeInstruction = function (code, instruction, args, curCell) {
-  instruction(code, ...args);
+  return instruction(code, curCell, ...args);
+};
 
-  return curCell + args.length + 1;
+const getCurrentInstruction = function (currentInstruction) {
+  const instructions = [{ instruction: 0, fn: put, noOfArgs: 2 }];
+  return instructions.find(
+    ({ instruction }) => instruction === currentInstruction
+  );
 };
 
 const sprintExecuter = function (code) {
   const halt = 9;
-  const instructions = [{ instruction: 0, fn: put, noOfArgs: 2 }];
   let curCell = 1;
 
   while (code[curCell] !== halt) {
-    const currentInstruction = code[curCell];
-    const instructionObject = instructions.find(
-      ({ instruction }) => instruction === currentInstruction
+    const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
+      code[curCell]
     );
 
-    const { noOfArgs, fn: instructionToExecute } = instructionObject;
-    const args = getSpecifiedValues(
-      code,
-      range(curCell + 1, curCell + noOfArgs + 1)
-    );
+    const keyValuesOfArguments = range(curCell + 1, curCell + noOfArgs + 1);
+    const args = getValuesOfKeys(code, keyValuesOfArguments);
 
     curCell = executeInstruction(code, instructionToExecute, args, curCell);
   }
+
   return code;
 };
 
@@ -57,7 +61,7 @@ const main = function () {
   return sprintExecuter(convertToObject(code));
 };
 
-// console.log(main());
+console.log(main());
 
 // ----------------- Testing Fragment -------------------
 const areEqual = function (element1, element2) {
