@@ -6,6 +6,7 @@ const cumulativeSumReducer = function (numbers, number) {
 const cumulativeSum = (numbers) => numbers.reduce(cumulativeSumReducer, []);
 const rangeArray = (noOfOnes) => Array(noOfOnes).fill(1);
 const range = (from, to) => cumulativeSum([from, ...rangeArray(to - from - 1)]);
+
 const readSprint = function () {
   const code = prompt("Paste your sprint program here: ").trim();
   return code.length === 0 ? readSprint() : code;
@@ -19,18 +20,35 @@ const stringToNumber = (numbers) => numbers.map((number) => +number);
 const arrayToObject = (obj, number, index) => ({ ...obj, [index + 1]: number });
 const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
 
-const put = function (code, currentCell, value, targetCell) {
+const put = function (value, targetCell, code, currentCell) {
   code[targetCell] = value;
   return currentCell + 3;
 };
 
+const jump = (targetCell) => targetCell;
+const add = function (cell1, cell2, targetCell, code, currentCell) {
+  code[targetCell] = code[cell1] + code[cell2];
+
+  return currentCell + 4;
+};
+
+const sub = function (cell1, cell2, targetCell, code, currentCell) {
+  code[targetCell] = code[cell1] - code[cell2];
+  return currentCell + 4;
+};
+
 const getValuesOfKeys = (object, keys) => keys.map((key) => object[key]);
 const executeInstruction = function (code, instruction, args, curCell) {
-  return instruction(code, curCell, ...args);
+  return instruction(...args, code, curCell);
 };
 
 const getCurrentInstruction = function (currentInstruction) {
-  const instructions = [{ instruction: 0, fn: put, noOfArgs: 2 }];
+  const instructions = [
+    { instruction: 0, fn: put, noOfArgs: 2 },
+    { instruction: 3, fn: jump, noOfArgs: 1 },
+    { instruction: 1, fn: add, noOfArgs: 3 },
+    { instruction: 2, fn: sub, noOfArgs: 3 },
+  ];
   return instructions.find(
     ({ instruction }) => instruction === currentInstruction
   );
