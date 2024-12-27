@@ -17,8 +17,8 @@ const removeAll = (array, culprit) =>
 
 const stringToNumber = (numbers) => numbers.map((number) => +number);
 
-const arrayToObject = (obj, number, index) => ({ ...obj, [index + 1]: number });
-const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
+// const arrayToObject = (obj, number, index) => ({ ...obj, [index + 1]: number });
+// const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
 
 const put = function (value, targetCell, code, currentCell) {
   code[targetCell] = value;
@@ -38,48 +38,48 @@ const sub = function (cell1, cell2, targetCell, code, currentCell) {
 };
 
 const getValuesOfKeys = (object, keys) => keys.map((key) => object[key]);
-const executeInstruction = function (code, instruction, args, curCell) {
-  return instruction(...args, code, curCell);
-};
 
-const getCurrentInstruction = function (currentInstruction) {
-  const instructions = [
-    { instruction: 0, fn: put, noOfArgs: 2 },
-    { instruction: 3, fn: jump, noOfArgs: 1 },
-    { instruction: 1, fn: add, noOfArgs: 3 },
-    { instruction: 2, fn: sub, noOfArgs: 3 },
-  ];
+const getCurrentInstruction = function (currentInstruction, instructions) {
   return instructions.find(
     ({ instruction }) => instruction === currentInstruction
   );
 };
 
 const sprintExecuter = function (code) {
+  const instructions = [
+    { instruction: 0, fn: put, noOfArgs: 2 },
+    { instruction: 3, fn: jump, noOfArgs: 1 },
+    { instruction: 1, fn: add, noOfArgs: 3 },
+    { instruction: 2, fn: sub, noOfArgs: 3 },
+  ];
+
   const halt = 9;
   let curCell = 1;
 
   while (code[curCell] !== halt) {
     const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
-      code[curCell]
+      code[curCell],
+      instructions
     );
 
     const keyValuesOfArguments = range(curCell + 1, curCell + noOfArgs + 1);
     const args = getValuesOfKeys(code, keyValuesOfArguments);
 
-    curCell = executeInstruction(code, instructionToExecute, args, curCell);
+    curCell = instructionToExecute(...args, code, curCell);
   }
 
   return code;
 };
 
 const main = function () {
-  const codeInString = readSprint();
-  const code = stringToNumber(removeAll(codeInString.split(" "), ""));
+  const codeInString = readSprint().split(" ");
+  const code = stringToNumber(removeAll(codeInString, ""));
 
-  return sprintExecuter(convertToObject(code));
+  console.log([, ...code]);
+  return sprintExecuter([, ...code]);
 };
 
-// console.table(main());
+console.table(main());
 
 // ----------------- Testing Fragment -------------------
 
@@ -93,7 +93,5 @@ const testCases = [
   [range, [1, 4], [1, 2, 3]],
 ];
 
-import { testExecuter } from "/Users/tatipudiprasad/workspace/js/assignments/test_framework/test.js";
-
-// import { testExecuter } from "../../../assignments/test_framework/test.js";
-testExecuter(testCases);
+import { testExecuter } from "../../../assignments/test_framework/test.js";
+// testExecuter(testCases);
