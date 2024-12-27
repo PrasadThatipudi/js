@@ -17,9 +17,6 @@ const removeAll = (array, culprit) =>
 
 const stringToNumber = (numbers) => numbers.map((number) => +number);
 
-// const arrayToObject = (obj, number, index) => ({ ...obj, [index + 1]: number });
-// const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
-
 const put = function (value, targetCell, code, currentCell) {
   code[targetCell] = value;
   return currentCell + 3;
@@ -45,30 +42,58 @@ const getCurrentInstruction = function (currentInstruction, instructions) {
   );
 };
 
+// {
+//   const halt = 9;
+//   let curCell = 1;
+
+//   while (code[curCell] !== halt) {
+//     const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
+//       code[curCell],
+//       instructions
+//     );
+
+//     const keyValuesOfArguments = range(curCell + 1, curCell + noOfArgs + 1);
+//     const args = getValuesOfKeys(code, keyValuesOfArguments);
+
+//     curCell = instructionToExecute(...args, code, curCell);
+//   }
+
+//   return code;
+// }
+const halt = 9;
+
+const executeCode = function (instructions, code, currentCell) {
+  const currentInstruction = code[currentCell];
+
+  if (currentInstruction === halt) {
+    return code;
+  }
+
+  const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
+    currentInstruction,
+    instructions
+  );
+
+  const keyValuesOfArguments = range(
+    currentCell + 1,
+    currentCell + noOfArgs + 1
+  );
+  const args = getValuesOfKeys(code, keyValuesOfArguments);
+  currentCell = instructionToExecute(...args, code, currentCell);
+
+  return executeCode(instructions, code, currentCell);
+};
+
 const sprintExecuter = function (code) {
   const instructions = [
     { instruction: 0, fn: put, noOfArgs: 2 },
     { instruction: 3, fn: jump, noOfArgs: 1 },
     { instruction: 1, fn: add, noOfArgs: 3 },
     { instruction: 2, fn: sub, noOfArgs: 3 },
+    { instruction: 9, fn: halt, noOfArgs: 0 },
   ];
 
-  const halt = 9;
-  let curCell = 1;
-
-  while (code[curCell] !== halt) {
-    const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
-      code[curCell],
-      instructions
-    );
-
-    const keyValuesOfArguments = range(curCell + 1, curCell + noOfArgs + 1);
-    const args = getValuesOfKeys(code, keyValuesOfArguments);
-
-    curCell = instructionToExecute(...args, code, curCell);
-  }
-
-  return code;
+  return executeCode(instructions, code, 1);
 };
 
 const main = function () {
