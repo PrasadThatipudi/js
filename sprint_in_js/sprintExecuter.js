@@ -79,74 +79,9 @@ const main = function () {
   return sprintExecuter(convertToObject(code));
 };
 
-console.log(main());
+// console.table(main());
 
 // ----------------- Testing Fragment -------------------
-const areEqual = function (element1, element2) {
-  return element1 === element2;
-};
-
-const areArraysEqual = function (element1, element2) {
-  if (!Array.isArray(element1)) {
-    return areEqual(element1, element2);
-  }
-
-  if (!areEqual(element1.length, element2.length)) {
-    return false;
-  }
-
-  for (const index in element1) {
-    if (!areArraysEqual(element1[index], element2[index])) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-const getTestResult = function ([functionName, params, expected]) {
-  const actual = functionName(...params);
-
-  return [functionName, params, expected, actual];
-};
-
-const isTestFailed = function ([functionName, params, expected, actual]) {
-  return !areArraysEqual(actual, expected);
-};
-
-const complement = function (functionRef) {
-  return function (...args) {
-    return !functionRef(...args);
-  };
-};
-
-const isTestPassed = function (testResult) {
-  return complement(isTestFailed)(testResult);
-};
-
-const displayTestResult = function (failed) {
-  if (failed.length === 0) {
-    console.log("All tests passed!");
-    return;
-  }
-
-  console.table(failed);
-};
-
-const displayPassedTests = function (passed) {
-  if (confirm("Do you want to see passed tests?")) {
-    console.table(passed);
-  }
-};
-
-const testExecuter = function (testCases) {
-  const testResult = testCases.map(getTestResult);
-  const failed = testResult.filter(isTestFailed);
-  const passed = testResult.filter(isTestPassed);
-
-  displayTestResult(failed);
-  displayPassedTests(passed);
-};
 
 const testCases = [
   [removeAll, [["1", "2", "2", "3"], "2"], ["1", "3"]],
@@ -158,4 +93,7 @@ const testCases = [
   [range, [1, 4], [1, 2, 3]],
 ];
 
+import { testExecuter } from "/Users/tatipudiprasad/workspace/js/assignments/test_framework/test.js";
+
+// import { testExecuter } from "../../../assignments/test_framework/test.js";
 testExecuter(testCases);
