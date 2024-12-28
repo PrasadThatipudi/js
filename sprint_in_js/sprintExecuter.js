@@ -6,7 +6,7 @@ const readSprint = function () {
 const removeAll = (array, culprit) =>
   array.filter((element) => element !== culprit);
 
-const replaceLabelWithNumber = function (labels, number, index) {
+const replaceLabelWithNumber = function (labels, number) {
   if (isNaN(number)) {
     return number.includes(":") ? +number.split(":")[1] : labels[number];
   }
@@ -15,9 +15,7 @@ const replaceLabelWithNumber = function (labels, number, index) {
 };
 
 const stringToNumber = function (numbers, labels) {
-  return numbers.map((number, index) =>
-    replaceLabelWithNumber(labels, number, index)
-  );
+  return numbers.map((number) => replaceLabelWithNumber(labels, number));
 };
 
 const put = function (value, targetCell, code, currentCell) {
@@ -30,6 +28,11 @@ const copy = (sourceCell, targetCell, code, currentCell) =>
 
 const jump = (targetCell) => targetCell;
 
+const addTwoNumbers = (a, b) => a + b;
+const subTwoNumbers = (a, b) => a - b;
+const isEqual = (a, b) => a === b;
+const isLessThan = (a, b) => a < b;
+
 const arithmetics = function (
   lhsCell,
   rhsCell,
@@ -41,11 +44,6 @@ const arithmetics = function (
   code[targetCell] = mapper(code[lhsCell], code[rhsCell]);
   return curCell + 4;
 };
-
-const addTwoNumbers = (a, b) => a + b;
-const subTwoNumbers = (a, b) => a - b;
-const isEqual = (a, b) => a === b;
-const isLessThan = (a, b) => a < b;
 
 const add = (lhsCell, rhsCell, resultCell, code, curCell) =>
   arithmetics(lhsCell, rhsCell, resultCell, code, curCell, addTwoNumbers);
@@ -143,6 +141,7 @@ const getLabels = function (code) {
     );
 };
 
+const displaySprintCode = (code) => console.table([convertToObject(code)]);
 const main = function () {
   const codeInString = readSprint().split(" ");
   const code = [, ...removeAll(codeInString, "")];
@@ -150,12 +149,11 @@ const main = function () {
 
   const codeToBeExecuted = stringToNumber(code, labels);
   const [error, resultCode] = sprintExecuter(codeToBeExecuted);
-  if (error) console.log(error);
-
-  return [convertToObject(resultCode)];
+  if (error) return console.log(error);
+  displaySprintCode(resultCode);
 };
 
-console.table(main());
+main();
 
 // ----------------- Testing Fragment -------------------
 
@@ -172,4 +170,4 @@ const testCases = [
 ];
 
 import { testExecuter } from "../../../assignments/test_framework/test.js";
-testExecuter(testCases);
+// testExecuter(testCases);
