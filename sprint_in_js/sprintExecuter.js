@@ -1,12 +1,3 @@
-const cumulativeSumReducer = function (numbers, number) {
-  const nextNum = numbers.at(-1) + number || number;
-  return [...numbers, nextNum];
-};
-
-const cumulativeSum = (numbers) => numbers.reduce(cumulativeSumReducer, []);
-const rangeArray = (noOfOnes) => Array(noOfOnes).fill(1);
-const range = (from, to) => cumulativeSum([from, ...rangeArray(to - from - 1)]);
-
 const readSprint = function () {
   const code = prompt("Paste your sprint program here: ").trim();
   return code.length === 0 ? readSprint() : code;
@@ -72,6 +63,7 @@ const eofStatus = function (currentInstruction, instructions) {
 
   return [false, ""];
 };
+
 const executeCode = function (instructions, code, currentCell) {
   const curInstruction = code[currentCell];
   const [isExecutionEnded, err] = eofStatus(curInstruction, instructions);
