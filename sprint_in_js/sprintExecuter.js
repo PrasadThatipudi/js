@@ -19,48 +19,46 @@ const copy = function (sourceCell, targetCell, code, currentCell) {
 
 const jump = (targetCell) => targetCell;
 
-const addOrSub = function (
-  cell1,
-  cell2,
-  targetCell,
-  code,
-  currentCell,
-  operation
-) {
-  code[targetCell] = operation(code[cell1], code[cell2]);
-  return currentCell + 4;
+const arithmetics = function (lhsCell, rhsCell, targetCell, code, curCell, fn) {
+  code[targetCell] = fn(code[lhsCell], code[rhsCell]);
+  return curCell + 4;
 };
 
 const addTwoNumbers = (a, b) => a + b;
 const subTwoNumbers = (a, b) => a - b;
+const isEqual = (a, b) => a === b;
+const isLessThan = (a, b) => a < b;
 
-const add = function (cell1, cell2, targetCell, code, currentCell) {
-  return addOrSub(cell1, cell2, targetCell, code, currentCell, addTwoNumbers);
+const add = (lhsCell, rhsCell, resultCell, code, curCell) =>
+  arithmetics(lhsCell, rhsCell, resultCell, code, curCell, addTwoNumbers);
+
+const sub = (lhsCell, rhsCell, resultCell, code, curCell) =>
+  arithmetics(lhsCell, rhsCell, resultCell, code, curCell, subTwoNumbers);
+
+const jumpIf = function (
+  lhsCell,
+  rhsCell,
+  resultCell,
+  code,
+  curCell,
+  predicate
+) {
+  return predicate(code[lhsCell], code[rhsCell]) ? resultCell : curCell + 4;
 };
 
-const sub = function (cell1, cell2, targetCell, code, currentCell) {
-  return addOrSub(cell1, cell2, targetCell, code, currentCell, subTwoNumbers);
-};
+const jumpIfEqual = (lhsCell, rhsCell, targetCell, code, currentCell) =>
+  jumpIf(lhsCell, rhsCell, targetCell, code, currentCell, isEqual);
 
-const jumpIfEqual = function (cell1, cell2, targetCell, code, currentCell) {
-  return code[cell1] === code[cell2] ? targetCell : currentCell + 4;
-};
+const jumpIfLessThan = (lhsCell, rhsCell, targetCell, code, currentCell) =>
+  jumpIf(lhsCell, rhsCell, targetCell, code, currentCell, isLessThan);
 
-const jumpIfLessThan = function (cell1, cell2, targetCell, code, currentCell) {
-  return code[cell1] < code[cell2] ? targetCell : currentCell + 4;
-};
-
-const getCurrentInstruction = function (currentInstruction, instructions) {
-  return instructions.find(
-    ({ instruction }) => instruction === currentInstruction
-  );
-};
+const getCurrentInstruction = (currentInstruction, instructions) =>
+  instructions.find(({ instruction }) => instruction === currentInstruction);
 
 const halt = 9;
 
-const isInstructionValid = function (curInstruction, instructions) {
-  return instructions.some(({ instruction }) => curInstruction === instruction);
-};
+const isInstructionValid = (curInstruction, instructions) =>
+  instructions.some(({ instruction }) => curInstruction === instruction);
 
 const eofStatus = function (currentInstruction, instructions) {
   if (currentInstruction === halt) {
@@ -81,9 +79,7 @@ const executeCode = function (instructions, code, currentCell) {
   const curInstruction = code[currentCell];
   const [isExecutionEnded, err] = eofStatus(curInstruction, instructions);
 
-  if (isExecutionEnded) {
-    return [err, code];
-  }
+  if (isExecutionEnded) return [err, code];
 
   const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
     curInstruction,
