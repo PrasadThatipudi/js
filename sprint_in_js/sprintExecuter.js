@@ -22,6 +22,10 @@ const put = function (value, targetCell, code, currentCell) {
   return currentCell + 3;
 };
 
+const copy = function (sourceCell, targetCell, code, currentCell) {
+  return put(code[sourceCell], targetCell, code, currentCell);
+};
+
 const jump = (targetCell) => targetCell;
 const add = function (cell1, cell2, targetCell, code, currentCell) {
   code[targetCell] = code[cell1] + code[cell2];
@@ -34,7 +38,13 @@ const sub = function (cell1, cell2, targetCell, code, currentCell) {
   return currentCell + 4;
 };
 
-const getValuesOfKeys = (object, keys) => keys.map((key) => object[key]);
+const jumpIfEqual = function (cell1, cell2, targetCell, code, currentCell) {
+  return code[cell1] === code[cell2] ? targetCell : currentCell + 4;
+};
+
+const jumpIfLessThan = function (cell1, cell2, targetCell, code, currentCell) {
+  return code[cell1] < code[cell2] ? targetCell : currentCell + 4;
+};
 
 const getCurrentInstruction = function (currentInstruction, instructions) {
   return instructions.find(
@@ -42,66 +52,74 @@ const getCurrentInstruction = function (currentInstruction, instructions) {
   );
 };
 
-// {
-//   const halt = 9;
-//   let curCell = 1;
-
-//   while (code[curCell] !== halt) {
-//     const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
-//       code[curCell],
-//       instructions
-//     );
-
-//     const keyValuesOfArguments = range(curCell + 1, curCell + noOfArgs + 1);
-//     const args = getValuesOfKeys(code, keyValuesOfArguments);
-
-//     curCell = instructionToExecute(...args, code, curCell);
-//   }
-
-//   return code;
-// }
 const halt = 9;
 
-const executeCode = function (instructions, code, currentCell) {
-  const currentInstruction = code[currentCell];
+const isInstructionValid = function (curInstruction, instructions) {
+  return instructions.some(({ instruction }) => curInstruction === instruction);
+};
 
+const eofStatus = function (currentInstruction, instructions) {
   if (currentInstruction === halt) {
-    return code;
+    return [true, ""];
+  }
+
+  if (!isInstructionValid(currentInstruction, instructions)) {
+    return [
+      true,
+      "InstructionNotFound:" + currentInstruction + " is not an instruction!",
+    ];
+  }
+
+  return [false, ""];
+};
+const executeCode = function (instructions, code, currentCell) {
+  const curInstruction = code[currentCell];
+  const [isExecutionEnded, err] = eofStatus(curInstruction, instructions);
+
+  if (isExecutionEnded) {
+    return [err, code];
   }
 
   const { noOfArgs, fn: instructionToExecute } = getCurrentInstruction(
-    currentInstruction,
+    curInstruction,
     instructions
   );
 
-  const keyValuesOfArguments = range(
-    currentCell + 1,
-    currentCell + noOfArgs + 1
-  );
-  const args = getValuesOfKeys(code, keyValuesOfArguments);
-  currentCell = instructionToExecute(...args, code, currentCell);
+  const args = code.slice(currentCell + 1, currentCell + noOfArgs + 1);
 
-  return executeCode(instructions, code, currentCell);
+  return executeCode(
+    instructions,
+    code,
+    instructionToExecute(...args, code, currentCell)
+  );
 };
 
 const sprintExecuter = function (code) {
   const instructions = [
     { instruction: 0, fn: put, noOfArgs: 2 },
+    { instruction: 7, fn: copy, noOfArgs: 2 },
     { instruction: 3, fn: jump, noOfArgs: 1 },
     { instruction: 1, fn: add, noOfArgs: 3 },
     { instruction: 2, fn: sub, noOfArgs: 3 },
-    { instruction: 9, fn: halt, noOfArgs: 0 },
+    { instruction: 5, fn: jumpIfLessThan, noOfArgs: 3 },
+    { instruction: 4, fn: jumpIfEqual, noOfArgs: 3 },
   ];
 
   return executeCode(instructions, code, 1);
 };
 
+const arrayToObject = (obj, number, index) => ({ ...obj, [index]: number });
+const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
+
 const main = function () {
   const codeInString = readSprint().split(" ");
   const code = stringToNumber(removeAll(codeInString, ""));
 
-  console.log([, ...code]);
-  return sprintExecuter([, ...code]);
+  // console.log([, ...code]);
+  const [errors, resultCode] = sprintExecuter([, ...code]);
+  if (errors) console.log(errors);
+
+  return [convertToObject(resultCode)];
 };
 
 console.table(main());
@@ -110,12 +128,26 @@ console.table(main());
 
 const testCases = [
   [removeAll, [["1", "2", "2", "3"], "2"], ["1", "3"]],
+  [removeAll, [[" ", "h", "b", "", " "], " "], ["h", "b", ""]],
+  [removeAll, [["a", "b", "c"], "d"], ["a", "b", "c"]],
 
   [stringToNumber, [["1", "2", "3"]], [1, 2, 3]],
+  [stringToNumber, [["-2", "89", "-34"]], [-2, 89, -34]],
+  // [stringToNumber, [["a", "b"]], [NaN, NaN]],
+
+  [cumulativeSum, [[]], []],
+  [cumulativeSum, [[1]], [1]],
+  [cumulativeSum, [[1, 3, 5]], [1, 4, 9]],
   [cumulativeSum, [[1, 1, 1, 1, 1]], [1, 2, 3, 4, 5]],
+
   [rangeArray, [2], [1, 1]],
+  [rangeArray, [0], []],
+
   [range, [0, 4], [0, 1, 2, 3]],
   [range, [1, 4], [1, 2, 3]],
+
+  [put, [34, 1, [, 0, 34, 1, 9], 1], 4],
+  [put, [4, 2, [, 0, 34, 1, 0, 4, 2, 9], 4], 7],
 ];
 
 import { testExecuter } from "../../../assignments/test_framework/test.js";
