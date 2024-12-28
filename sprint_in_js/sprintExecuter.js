@@ -6,21 +6,39 @@ const readSprint = function () {
 const removeAll = (array, culprit) =>
   array.filter((element) => element !== culprit);
 
-const stringToNumber = (numbers) => numbers.map((number) => +number);
+const replaceLabelWithNumber = function (labels, number, index) {
+  if (isNaN(number)) {
+    return number.includes(":") ? +number.split(":")[1] : labels[number];
+  }
+
+  return +number;
+};
+
+const stringToNumber = function (numbers, labels) {
+  return numbers.map((number, index) =>
+    replaceLabelWithNumber(labels, number, index)
+  );
+};
 
 const put = function (value, targetCell, code, currentCell) {
   code[targetCell] = value;
   return currentCell + 3;
 };
 
-const copy = function (sourceCell, targetCell, code, currentCell) {
-  return put(code[sourceCell], targetCell, code, currentCell);
-};
+const copy = (sourceCell, targetCell, code, currentCell) =>
+  put(code[sourceCell], targetCell, code, currentCell);
 
 const jump = (targetCell) => targetCell;
 
-const arithmetics = function (lhsCell, rhsCell, targetCell, code, curCell, fn) {
-  code[targetCell] = fn(code[lhsCell], code[rhsCell]);
+const arithmetics = function (
+  lhsCell,
+  rhsCell,
+  targetCell,
+  code,
+  curCell,
+  mapper
+) {
+  code[targetCell] = mapper(code[lhsCell], code[rhsCell]);
   return curCell + 4;
 };
 
@@ -112,13 +130,27 @@ const sprintExecuter = function (code) {
 const arrayToObject = (obj, number, index) => ({ ...obj, [index]: number });
 const convertToObject = (numbers) => numbers.reduce(arrayToObject, {});
 
+const getLabels = function (code) {
+  return code
+    .map((value, index) => [value, index])
+    .filter(([label]) => label.includes(":"))
+    .reduce(
+      (labels, [label, cell]) => ({
+        ...labels,
+        [label.split(":")[0]]: cell,
+      }),
+      {}
+    );
+};
+
 const main = function () {
   const codeInString = readSprint().split(" ");
-  const code = stringToNumber(removeAll(codeInString, ""));
+  const code = [, ...removeAll(codeInString, "")];
+  const labels = getLabels(code);
 
-  // console.log([, ...code]);
-  const [errors, resultCode] = sprintExecuter([, ...code]);
-  if (errors) console.log(errors);
+  const codeToBeExecuted = stringToNumber(code, labels);
+  const [error, resultCode] = sprintExecuter(codeToBeExecuted);
+  if (error) console.log(error);
 
   return [convertToObject(resultCode)];
 };
@@ -140,4 +172,4 @@ const testCases = [
 ];
 
 import { testExecuter } from "../../../assignments/test_framework/test.js";
-// testExecuter(testCases);
+testExecuter(testCases);
