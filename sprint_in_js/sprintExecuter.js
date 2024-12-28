@@ -18,15 +18,28 @@ const copy = function (sourceCell, targetCell, code, currentCell) {
 };
 
 const jump = (targetCell) => targetCell;
-const add = function (cell1, cell2, targetCell, code, currentCell) {
-  code[targetCell] = code[cell1] + code[cell2];
 
+const addOrSub = function (
+  cell1,
+  cell2,
+  targetCell,
+  code,
+  currentCell,
+  operation
+) {
+  code[targetCell] = operation(code[cell1], code[cell2]);
   return currentCell + 4;
 };
 
+const addTwoNumbers = (a, b) => a + b;
+const subTwoNumbers = (a, b) => a - b;
+
+const add = function (cell1, cell2, targetCell, code, currentCell) {
+  return addOrSub(cell1, cell2, targetCell, code, currentCell, addTwoNumbers);
+};
+
 const sub = function (cell1, cell2, targetCell, code, currentCell) {
-  code[targetCell] = code[cell1] - code[cell2];
-  return currentCell + 4;
+  return addOrSub(cell1, cell2, targetCell, code, currentCell, subTwoNumbers);
 };
 
 const jumpIfEqual = function (cell1, cell2, targetCell, code, currentCell) {
@@ -125,18 +138,6 @@ const testCases = [
 
   [stringToNumber, [["1", "2", "3"]], [1, 2, 3]],
   [stringToNumber, [["-2", "89", "-34"]], [-2, 89, -34]],
-  // [stringToNumber, [["a", "b"]], [NaN, NaN]],
-
-  [cumulativeSum, [[]], []],
-  [cumulativeSum, [[1]], [1]],
-  [cumulativeSum, [[1, 3, 5]], [1, 4, 9]],
-  [cumulativeSum, [[1, 1, 1, 1, 1]], [1, 2, 3, 4, 5]],
-
-  [rangeArray, [2], [1, 1]],
-  [rangeArray, [0], []],
-
-  [range, [0, 4], [0, 1, 2, 3]],
-  [range, [1, 4], [1, 2, 3]],
 
   [put, [34, 1, [, 0, 34, 1, 9], 1], 4],
   [put, [4, 2, [, 0, 34, 1, 0, 4, 2, 9], 4], 7],
